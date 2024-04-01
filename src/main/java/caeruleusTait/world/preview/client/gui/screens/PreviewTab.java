@@ -30,11 +30,13 @@ import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
+import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -98,10 +100,16 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewContainerDataProvi
         CompletableFuture<WorldCreationContext> completableFuture = WorldLoader.load(
                 initConfig,
                 dataLoadContext -> {
-                    ResourceKey<WorldPreset> worldPresetKey = uiState.getWorldType().preset().unwrapKey().orElseThrow();
-                    WorldPreset worldPreset = dataLoadContext.datapackWorldgen().registryOrThrow(Registries.WORLD_PRESET).getOrThrow(worldPresetKey);
-                    // WorldDimensions worldDimensions = WorldPresets.createNormalWorldDimensions(dataLoadContext.datapackWorldgen());
-                    WorldDimensions worldDimensions = worldPreset.createWorldDimensions();
+                    WorldDimensions worldDimensions;
+                    try {
+                        // If a WorldPreset is available, use it to generate the dimensions
+                        ResourceKey<WorldPreset> worldPresetKey = uiState.getWorldType().preset().unwrapKey().orElseThrow();
+                        WorldPreset worldPreset = dataLoadContext.datapackWorldgen().registryOrThrow(Registries.WORLD_PRESET).getOrThrow(worldPresetKey);
+                        worldDimensions = worldPreset.createWorldDimensions();
+                    } catch(NullPointerException | NoSuchElementException | IllegalStateException ex) {
+                        // Otherwise, create the dimensions using the world data (necessary if re-creating a world)
+                        worldDimensions = WorldPresets.createNormalWorldDimensions(dataLoadContext.datapackWorldgen());
+                    }
                     WorldGenSettings worldGenSettings = new WorldGenSettings(wcContext.options(), worldDimensions);
                     return new WorldLoader.DataLoadOutput<>(
                             new Cookie(worldGenSettings),
