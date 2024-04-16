@@ -29,7 +29,7 @@ public abstract class CreateWorldScreenMixin {
             ),
             slice = @Slice(
                     from = @At("HEAD"),
-                    to = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout;columnSpacing(I)Lnet/minecraft/client/gui/layouts/GridLayout;")
+                    to = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/HeaderAndFooterLayout;addToFooter(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;")
             )
     )
     private void appendPreviewTab(CallbackInfo ci) {

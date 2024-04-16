@@ -65,7 +65,6 @@ public class DimensionsTab implements Tab {
         top += LINE_HEIGHT + LINE_VSPACE;
         dimensionList.setPosition(left, top);
         dimensionList.setSize(width, bottom - top);
-        dimensionList.setRenderBackground(true);
     }
 
     public class DimensionList extends BaseObjectSelectionList<DimensionList.DimensionEntry> {

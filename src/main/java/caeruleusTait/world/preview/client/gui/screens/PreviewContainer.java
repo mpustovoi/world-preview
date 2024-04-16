@@ -21,7 +21,10 @@ import com.mojang.blaze3d.platform.NativeImage;
 import it.unimi.dsi.fastutil.shorts.Short2LongMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
@@ -49,7 +52,18 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -59,7 +73,23 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static caeruleusTait.world.preview.WorldPreview.LOGGER;
-import static caeruleusTait.world.preview.client.WorldPreviewComponents.*;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.BTN_CAVES;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.BTN_HOME;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.BTN_RANDOM;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.BTN_RESET_STRUCTURES;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.BTN_RESET_STRUCTURES_TOOLTIP;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.BTN_SAVE_SEED;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.BTN_SETTINGS;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.BTN_SWITCH_STRUCT_DISABLED;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.BTN_TOGGLE_HEIGHTMAP;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.BTN_TOGGLE_HEIGHTMAP_DISABLED;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.BTN_TOGGLE_INTERSECT;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.BTN_TOGGLE_INTERSECT_DISABLED;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.BTN_TOGGLE_STRUCTURES;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.BTN_TOGGLE_STRUCTURES_DISABLED;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.SEED_FIELD;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.SEED_LABEL;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.TITLE;
 
 public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvider {
 
@@ -800,11 +830,9 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
 
         biomesList.setPosition(left, top);
         biomesList.setSize(leftWidth, bottom - top - LINE_VSPACE);
-        biomesList.setRenderBackground(true);
 
         seedsList.setPosition(left, top);
         seedsList.setSize(leftWidth, bottom - top - LINE_VSPACE);
-        seedsList.setRenderBackground(true);
 
         // BOTTOM
         //  - new row
@@ -815,7 +843,6 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
 
         structuresList.setPosition(left, top);
         structuresList.setSize(leftWidth, bottom - top - LINE_VSPACE);
-        structuresList.setRenderBackground(true);
 
         moveList(biomesList);
         moveList(structuresList);

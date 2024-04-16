@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.*;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -143,7 +144,7 @@ public class PreviewLevel implements WorldGenLevel {
     }
 
     @Override
-    public void gameEvent(GameEvent event, Vec3 position, GameEvent.Context context) {
+    public void gameEvent(Holder<GameEvent> holder, Vec3 vec3, GameEvent.Context context) {
         throw new NotImplementedException("Not implemented");
     }
 

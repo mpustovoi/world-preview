@@ -29,7 +29,16 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static caeruleusTait.world.preview.client.WorldPreviewComponents.*;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.SETTINGS_HEIGHTMAP_COLORMAP;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.SETTINGS_HEIGHTMAP_DISABLED;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.SETTINGS_HEIGHTMAP_MAX_Y;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.SETTINGS_HEIGHTMAP_MAX_Y_TOOLTIP;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.SETTINGS_HEIGHTMAP_MIN_Y;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.SETTINGS_HEIGHTMAP_MIN_Y_TOOLTIP;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.SETTINGS_HEIGHTMAP_PRESETS;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.SETTINGS_HEIGHTMAP_TITLE;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.SETTINGS_HEIGHTMAP_VISUAL;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.SETTINGS_HEIGHTMAP_VISUAL_TOOLTIP;
 import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.LINE_HEIGHT;
 import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.LINE_VSPACE;
 
@@ -195,7 +204,6 @@ public class HeightmapTab implements Tab {
         topL += (LINE_HEIGHT / 2) + LINE_VSPACE;
         heightPresetList.setPosition(leftL, topL);
         heightPresetList.setSize(secWidth, bottomL - topL - LINE_VSPACE);
-        heightPresetList.setRenderBackground(true);
 
         // RIGHT COLUMN
         //  - TOP
@@ -206,7 +214,6 @@ public class HeightmapTab implements Tab {
         topR += (LINE_HEIGHT / 2) + LINE_VSPACE;
         colormapList.setPosition(leftR, topR);
         colormapList.setSize(secWidth, bottomR - topR + LINE_HEIGHT);
-        colormapList.setRenderBackground(true);
     }
 
 

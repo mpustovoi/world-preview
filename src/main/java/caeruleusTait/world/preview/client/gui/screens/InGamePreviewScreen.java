@@ -1,6 +1,5 @@
 package caeruleusTait.world.preview.client.gui.screens;
 
-import caeruleusTait.world.preview.RenderSettings;
 import caeruleusTait.world.preview.WorldPreview;
 import caeruleusTait.world.preview.backend.storage.PreviewStorage;
 import caeruleusTait.world.preview.client.WorldPreviewComponents;
@@ -31,7 +30,6 @@ import java.security.InvalidParameterException;
 
 import static caeruleusTait.world.preview.client.WorldPreviewComponents.LOADING_PREVIEW;
 import static caeruleusTait.world.preview.client.WorldPreviewComponents.SAVING_PREVIEW;
-import static net.minecraft.client.gui.screens.worldselection.CreateWorldScreen.FOOTER_SEPERATOR;
 
 public class InGamePreviewScreen extends Screen implements PreviewContainerDataProvider {
 
@@ -73,12 +71,7 @@ public class InGamePreviewScreen extends Screen implements PreviewContainerDataP
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         guiGraphics.drawCenteredString(minecraft.font, WorldPreviewComponents.TITLE_FULL, width / 2, 6, 0xFFFFFF);
-        guiGraphics.blit(FOOTER_SEPERATOR, 0, Mth.roundToward(this.height - 30, 2), 0.0F, 0.0F, this.width, 2, 32, 2);
-    }
-
-    @Override
-    public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
-        renderDirtBackground(guiGraphics);
+        guiGraphics.blit(FOOTER_SEPARATOR, 0, Mth.roundToward(this.height - 30, 2), 0.0F, 0.0F, this.width, 2, 32, 2);
     }
 
     @Override

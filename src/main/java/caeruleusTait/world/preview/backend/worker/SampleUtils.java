@@ -35,7 +35,7 @@ import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.*;
@@ -62,6 +62,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
@@ -174,7 +176,7 @@ public class SampleUtils implements AutoCloseable {
             WorldDataConfiguration worldDataConfiguration,
             Proxy proxy,
             @Nullable Path tempDataPackDir
-    ) throws IOException {
+    ) throws IOException, RuntimeException {
         try {
             tempDir = Files.createTempDirectory("world_preview");
         } catch (IOException e) {
@@ -235,9 +237,22 @@ public class SampleUtils implements AutoCloseable {
         dimension = Registries.levelStemToLevel(levelStemResourceKey);
 
         // Some mods listen on the <init> of MinecraftServer
-        LevelSettings levelSettings = new LevelSettings("temp", GameType.CREATIVE, false, Difficulty.NORMAL, true, new GameRules(), worldDataConfiguration);
-        PrimaryLevelData primaryLevelData = new PrimaryLevelData(levelSettings, worldOptions, PrimaryLevelData.SpecialWorldProperty.NONE, Lifecycle.stable());
-        ReloadableServerResources reloadableServerResources = new ReloadableServerResources(layeredRegistryAccess.compositeAccess(), FeatureFlagSet.of(), Commands.CommandSelection.ALL, 0);
+        final int functionCompilationLevel = 0;
+        final Executor executor = Executors.newSingleThreadExecutor();
+        final LevelSettings levelSettings = new LevelSettings("temp", GameType.CREATIVE, false, Difficulty.NORMAL, true, new GameRules(), worldDataConfiguration);
+        final PrimaryLevelData primaryLevelData = new PrimaryLevelData(levelSettings, worldOptions, PrimaryLevelData.SpecialWorldProperty.NONE, Lifecycle.stable());
+        final var future = ReloadableServerResources.loadResources(resourceManager, layeredRegistryAccess, worldDataConfiguration.enabledFeatures(), Commands.CommandSelection.DEDICATED, functionCompilationLevel, executor, executor);
+        final ReloadableServerResources reloadableServerResources;
+        try {
+            reloadableServerResources = future.get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+        // Pre 1.20.5 version:
+        // ReloadableServerResources reloadableServerResources = new ReloadableServerResources(layeredRegistryAccess.compositeAccess(), FeatureFlagSet.of(), Commands.CommandSelection.ALL, 0);
         WorldStem worldStem = new WorldStem(resourceManager, reloadableServerResources, layeredRegistryAccess, primaryLevelData);
 
         final ChunkProgressListener chunkProgressListener = new ChunkProgressListener() {

@@ -2,7 +2,6 @@ package caeruleusTait.world.preview.client.gui.widgets.lists;
 
 import caeruleusTait.world.preview.client.WorldPreviewClient;
 import caeruleusTait.world.preview.client.gui.widgets.ToggleButton;
-import caeruleusTait.world.preview.client.gui.widgets.WGTooltip;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -21,7 +20,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.Objects;
 
-import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.*;
+import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.BUTTONS_TEXTURE;
+import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.BUTTONS_TEX_HEIGHT;
+import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.BUTTONS_TEX_WIDTH;
+import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.StructureRenderInfo;
 
 public class StructuresList extends BaseObjectSelectionList<StructuresList.StructureEntry> {
 
@@ -89,7 +91,7 @@ public class StructuresList extends BaseObjectSelectionList<StructuresList.Struc
             }
 
             String tag = "§5§o" + resourceLocation.getNamespace() + "§r\n§9" + resourceLocation.getPath() + "§r";
-            this.tooltip = new WGTooltip(Component.literal(this.name + "\n\n" + tag));
+            this.tooltip = Tooltip.create(Component.literal(this.name + "\n\n" + tag));
         }
 
         public void reset() {

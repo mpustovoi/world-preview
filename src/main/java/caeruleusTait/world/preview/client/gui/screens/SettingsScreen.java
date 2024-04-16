@@ -3,7 +3,12 @@ package caeruleusTait.world.preview.client.gui.screens;
 import caeruleusTait.world.preview.WorldPreview;
 import caeruleusTait.world.preview.backend.color.PreviewData;
 import caeruleusTait.world.preview.backend.color.PreviewMappingData;
-import caeruleusTait.world.preview.client.gui.screens.settings.*;
+import caeruleusTait.world.preview.client.gui.screens.settings.BiomesTab;
+import caeruleusTait.world.preview.client.gui.screens.settings.CacheTab;
+import caeruleusTait.world.preview.client.gui.screens.settings.DimensionsTab;
+import caeruleusTait.world.preview.client.gui.screens.settings.GeneralTab;
+import caeruleusTait.world.preview.client.gui.screens.settings.HeightmapTab;
+import caeruleusTait.world.preview.client.gui.screens.settings.SamplingTab;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.tabs.TabManager;
@@ -85,16 +90,6 @@ public class SettingsScreen extends Screen {
     public void render(GuiGraphics guiGraphics, int i, int j, float f) {
         guiGraphics.blit(FOOTER_SEPERATOR, 0, Mth.roundToward(this.height - 36 - 2, 2), 0.0F, 0.0F, this.width, 2, 32, 2);
         super.render(guiGraphics, i, j, f);
-    }
-
-    @Override
-    public void renderDirtBackground(GuiGraphics guiGraphics) {
-        guiGraphics.blit(LIGHT_DIRT_BACKGROUND, 0, 0, 0, 0.0F, 0.0F, this.width, this.height, 32, 32);
-    }
-
-    @Override
-    public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
-        renderDirtBackground(guiGraphics);
     }
 
     @Override

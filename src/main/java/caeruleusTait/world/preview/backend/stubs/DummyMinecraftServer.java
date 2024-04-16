@@ -8,6 +8,7 @@ import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.util.debugchart.SampleLogger;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,6 +50,28 @@ public class DummyMinecraftServer extends MinecraftServer {
 
     @Override
     public boolean shouldRconBroadcast() {
+        return false;
+    }
+
+    @Override
+    protected SampleLogger getTickTimeLogger() {
+        return new SampleLogger() {
+            @Override
+            public void logFullSample(long[] ls) {
+            }
+
+            @Override
+            public void logSample(long l) {
+            }
+
+            @Override
+            public void logPartialSample(long l, int i) {
+            }
+        };
+    }
+
+    @Override
+    public boolean isTickTimeLoggingEnabled() {
         return false;
     }
 

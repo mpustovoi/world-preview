@@ -18,6 +18,7 @@ import it.unimi.dsi.fastutil.shorts.Short2LongOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.sounds.SoundManager;
@@ -33,9 +34,12 @@ import org.joml.Matrix4f;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Queue;
 
-import static caeruleusTait.world.preview.WorldPreview.LOGGER;
 import static caeruleusTait.world.preview.client.WorldPreviewComponents.MSG_ERROR_SETUP_FAILED;
 import static caeruleusTait.world.preview.client.WorldPreviewComponents.MSG_PREVIEW_SETUP_LOADING;
 
@@ -668,13 +672,13 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         if (!structuresInfos.isEmpty()) {
             var structure = structuresInfos.get(0).structure;
             if (config.showControls) {
-                setTooltip(new WGTooltip(Component.translatable(
+                setTooltip(Tooltip.create(Component.translatable(
                         "world_preview.preview-display.struct.tooltip.controls",
                         nameFormatter(dataProvider.structure4Id(structure.structureId()).name()),
                         blockPosTemplate.formatted(structure.center().getX(), structure.center().getY(), structure.center().getZ())
                 )));
             } else {
-                setTooltip(new WGTooltip(Component.translatable(
+                setTooltip(Tooltip.create(Component.translatable(
                         "world_preview.preview-display.struct.tooltip",
                         nameFormatter(dataProvider.structure4Id(structure.structureId()).name()),
                         blockPosTemplate.formatted(structure.center().getX(), structure.center().getY(), structure.center().getZ())
@@ -686,14 +690,14 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         String height = hoverInfo.height > Short.MIN_VALUE ? String.format("§b%d§r", hoverInfo.height) : "§7<N/A>§r";
 
         if (config.showControls) {
-            setTooltip(new WGTooltip(Component.translatable(
+            setTooltip(Tooltip.create(Component.translatable(
                     "world_preview.preview-display.tooltip.controls",
                     nameFormatter(hoverInfo.entry == null ? "<N/A>" : hoverInfo.entry.name()),
                     blockPosTemplate.formatted(hoverInfo.blockX, hoverInfo.blockY, hoverInfo.blockZ),
                     height
             )));
         } else {
-            setTooltip(new WGTooltip(Component.translatable(
+            setTooltip(Tooltip.create(Component.translatable(
                     "world_preview.preview-display.tooltip",
                     nameFormatter(hoverInfo.entry == null ? "<N/A>" : hoverInfo.entry.name()),
                     blockPosTemplate.formatted(hoverInfo.blockX, hoverInfo.blockY, hoverInfo.blockZ),

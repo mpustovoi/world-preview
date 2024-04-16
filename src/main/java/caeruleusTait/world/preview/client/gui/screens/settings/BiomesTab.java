@@ -9,7 +9,11 @@ import caeruleusTait.world.preview.client.gui.widgets.lists.BiomesList;
 import caeruleusTait.world.preview.mixin.client.CheckboxAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Checkbox;
+import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.tabs.Tab;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
@@ -29,7 +33,14 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static caeruleusTait.world.preview.client.WorldPreviewComponents.*;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.COLOR_APPLY;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.COLOR_CAVE;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.COLOR_HUE;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.COLOR_LIST_FILTER;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.COLOR_RESET;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.COLOR_SAT;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.COLOR_VAL;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.SETTINGS_BIOMES_TITLE;
 import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.LINE_HEIGHT;
 import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.LINE_VSPACE;
 
@@ -213,7 +224,6 @@ public class BiomesTab implements Tab {
         int listTop = top + LINE_HEIGHT + LINE_VSPACE;
         biomesList.setPosition(left, listTop);
         biomesList.setSize(leftWidth, bottom - listTop - LINE_VSPACE);
-        biomesList.setRenderBackground(true);
         biomesList.replaceEntries(filterCycleButton.getValue().apply(previewContainer.allBiomes()));
 
         colorChooser.setSquareSize(screenRectangle.width() / 4);

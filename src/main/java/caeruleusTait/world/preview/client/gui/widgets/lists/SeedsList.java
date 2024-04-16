@@ -5,13 +5,14 @@ import caeruleusTait.world.preview.client.gui.widgets.OldStyleImageButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 
-import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.*;
+import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.BUTTONS_TEXTURE;
+import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.BUTTONS_TEX_HEIGHT;
+import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.BUTTONS_TEX_WIDTH;
 
 public class SeedsList extends BaseObjectSelectionList<SeedsList.SeedEntry> {
     private final PreviewContainer previewContainer;

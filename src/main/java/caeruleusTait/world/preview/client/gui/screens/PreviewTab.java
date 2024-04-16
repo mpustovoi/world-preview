@@ -1,10 +1,8 @@
 package caeruleusTait.world.preview.client.gui.screens;
 
-import caeruleusTait.world.preview.RenderSettings;
 import caeruleusTait.world.preview.WorldPreview;
 import caeruleusTait.world.preview.backend.storage.PreviewStorage;
 import caeruleusTait.world.preview.client.gui.PreviewContainerDataProvider;
-import caeruleusTait.world.preview.mixin.MinecraftServerAccessor;
 import caeruleusTait.world.preview.mixin.client.CreateWorldScreenAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -31,7 +29,6 @@ import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
-import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,7 +40,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-import static caeruleusTait.world.preview.client.WorldPreviewComponents.*;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.LOADING_PREVIEW;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.SAVING_PREVIEW;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.TITLE;
 
 public class PreviewTab implements Tab, AutoCloseable, PreviewContainerDataProvider {
 

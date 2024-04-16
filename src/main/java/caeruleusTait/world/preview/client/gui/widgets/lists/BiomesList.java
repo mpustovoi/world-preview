@@ -3,7 +3,6 @@ package caeruleusTait.world.preview.client.gui.widgets.lists;
 import caeruleusTait.world.preview.backend.color.PreviewData;
 import caeruleusTait.world.preview.client.WorldPreviewClient;
 import caeruleusTait.world.preview.client.gui.screens.PreviewContainer;
-import caeruleusTait.world.preview.client.gui.widgets.WGTooltip;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
@@ -110,7 +109,7 @@ public class BiomesList extends BaseObjectSelectionList<BiomesList.BiomeEntry> {
             this.isPrimaryNamespace = resourceLocation.getNamespace().equals("minecraft");
 
             String tag = "§5§o" + resourceLocation.getNamespace() + "§r\n§9" + resourceLocation.getPath() + "§r";
-            this.tooltip = new WGTooltip(Component.literal(this.name + "\n\n" + tag));
+            this.tooltip = Tooltip.create(Component.literal(this.name + "\n\n" + tag));
         }
 
         public String name() {

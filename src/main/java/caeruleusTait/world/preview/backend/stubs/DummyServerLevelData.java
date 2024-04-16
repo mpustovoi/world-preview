@@ -1,5 +1,6 @@
 package caeruleusTait.world.preview.backend.stubs;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameRules;
@@ -109,7 +110,7 @@ public class DummyServerLevelData implements ServerLevelData {
     }
 
     @Override
-    public boolean getAllowCommands() {
+    public boolean isAllowCommands() {
         return false;
     }
 
@@ -134,38 +135,8 @@ public class DummyServerLevelData implements ServerLevelData {
     }
 
     @Override
-    public void setXSpawn(int xSpawn) {
-
-    }
-
-    @Override
-    public void setYSpawn(int ySpawn) {
-
-    }
-
-    @Override
-    public void setZSpawn(int zSpawn) {
-
-    }
-
-    @Override
-    public void setSpawnAngle(float spawnAngle) {
-
-    }
-
-    @Override
-    public int getXSpawn() {
-        return 0;
-    }
-
-    @Override
-    public int getYSpawn() {
-        return 0;
-    }
-
-    @Override
-    public int getZSpawn() {
-        return 0;
+    public BlockPos getSpawnPos() {
+        return BlockPos.ZERO;
     }
 
     @Override
@@ -216,5 +187,10 @@ public class DummyServerLevelData implements ServerLevelData {
     @Override
     public boolean isDifficultyLocked() {
         return false;
+    }
+
+    @Override
+    public void setSpawn(BlockPos spawnPoint, float spawnAngle) {
+
     }
 }
