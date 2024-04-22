@@ -80,6 +80,12 @@ This table shows the current support status for the Minecraft version.
 
 ---
 
+**Q:** *Will Multiplayer be supported?*
+
+**A:** No.
+
+---
+
 **Q:** *Scrolling does not zoom the preview!*
 
 **A:** Scrolling moves the y-level up and down. To change the zoom level, go to `Settings (top left wrench) -> Resolution` and change the visual size of a chunk.
