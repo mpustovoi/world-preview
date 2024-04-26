@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 
 import java.util.Collection;
 
@@ -46,12 +47,8 @@ public abstract class BaseObjectSelectionList<E extends BaseObjectSelectionList.
 
         E hovered = getHovered();
         if (hovered != null && hovered.tooltip() != null && minecraft.screen != null) {
-            setTooltip(hovered.tooltip());
-            // TODO: DefaultTooltipPositioner.INSTANCE
-        } else {
-            setTooltip(null);
+            minecraft.screen.setTooltipForNextRenderPass(hovered.tooltip(), DefaultTooltipPositioner.INSTANCE, true);
         }
-
     }
 
     /**
