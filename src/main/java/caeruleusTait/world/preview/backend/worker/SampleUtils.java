@@ -14,11 +14,21 @@ import com.mojang.serialization.Lifecycle;
 import net.minecraft.FileUtil;
 import net.minecraft.Util;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.LayeredRegistryAccess;
+import net.minecraft.core.QuartPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.*;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.RegistryLayer;
+import net.minecraft.server.ReloadableServerResources;
+import net.minecraft.server.Services;
+import net.minecraft.server.WorldLoader;
+import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.progress.ChunkProgressListener;
@@ -27,18 +37,34 @@ import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.flag.FeatureFlagSet;
-import net.minecraft.world.level.*;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.NoiseColumn;
+import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
-import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.chunk.ProtoChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.dimension.LevelStem;
-import net.minecraft.world.level.levelgen.*;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.DensityFunctions;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.NoiseChunk;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.NoiseRouter;
+import net.minecraft.world.level.levelgen.NoiseSettings;
+import net.minecraft.world.level.levelgen.RandomState;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureCheck;
@@ -79,6 +105,7 @@ public class SampleUtils implements AutoCloseable {
     private final BiomeSource biomeSource;
     private final RandomState randomState;
     private final ChunkGenerator chunkGenerator;
+    private final NoiseSettings noiseSettings;
     private final RegistryAccess registryAccess;
     private final ChunkGeneratorStructureState chunkGeneratorStructureState;
     private final StructureCheck structureCheck;
@@ -156,9 +183,11 @@ public class SampleUtils implements AutoCloseable {
         );
 
         if (chunkGenerator instanceof NoiseBasedChunkGenerator noiseBasedChunkGenerator) {
-            noiseGeneratorSettings = noiseBasedChunkGenerator.generatorSettings().value();
+            this.noiseGeneratorSettings = noiseBasedChunkGenerator.generatorSettings().value();
+            this.noiseSettings = noiseGeneratorSettings.noiseSettings();
         } else {
-            noiseGeneratorSettings = null;
+            this.noiseGeneratorSettings = null;
+            this.noiseSettings = null;
         }
         serverLevel = null;
     }
@@ -327,15 +356,17 @@ public class SampleUtils implements AutoCloseable {
 
         // Noise / Heightmap stuff -- and random state
         if (chunkGenerator instanceof NoiseBasedChunkGenerator noiseBasedChunkGenerator) {
-            noiseGeneratorSettings = noiseBasedChunkGenerator.generatorSettings().value();
-            randomState = RandomState.create(
+            this.noiseGeneratorSettings = noiseBasedChunkGenerator.generatorSettings().value();
+            this.noiseSettings = noiseGeneratorSettings.noiseSettings();
+            this.randomState = RandomState.create(
                     noiseBasedChunkGenerator.generatorSettings().value(),
                     registryAccess.lookupOrThrow(Registries.NOISE),
                     worldOptions.seed()
             );
         } else {
-            noiseGeneratorSettings = null;
-            randomState = RandomState.create(
+            this.noiseGeneratorSettings = null;
+            this.noiseSettings = null;
+            this.randomState = RandomState.create(
                     NoiseGeneratorSettings.dummy(),
                     registryAccess.lookupOrThrow(Registries.NOISE),
                     worldOptions.seed()
@@ -411,7 +442,6 @@ public class SampleUtils implements AutoCloseable {
     }
 
     public NoiseChunk getNoiseChunk(ChunkPos startChunk, int numChunks, boolean keepAquifer) {
-        NoiseSettings noiseSettings = noiseGeneratorSettings.noiseSettings();
         NoiseChunk noiseChunk = new NoiseChunk(
                 (numChunks * 16) / noiseSettings.getCellWidth(),
                 randomState,
@@ -441,6 +471,20 @@ public class SampleUtils implements AutoCloseable {
                 levelHeightAccessor,
                 randomState
         );
+    }
+
+    public short doFastApproxHeight(BlockPos pos) {
+        final int minY = noiseSettings.minY();
+        final int cellHeight = noiseSettings.getCellHeight();
+        final NoiseRouter noiseRouter = randomState.router();
+        final DensityFunction initialDensityNoJaggedness = noiseRouter.initialDensityWithoutJaggedness();
+
+        for(int l = minY + this.noiseSettings.height(); l >= minY; l -= cellHeight) {
+            if (initialDensityNoJaggedness.compute(new DensityFunction.SinglePointContext(pos.getX(), l, pos.getZ())) > 0.390625) {
+                return (short) l;
+            }
+        }
+        return Short.MIN_VALUE;
     }
 
     public NoiseColumn doIntersectionsSlow(BlockPos pos) {

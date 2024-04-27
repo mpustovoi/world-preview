@@ -297,6 +297,11 @@ public class WorkManager {
             units += queueForLevel(chunks, 0, 256, (pos, y) -> new StructStartWorkUnit(sampleUtils, pos, previewData));
         }
 
+        // Fast height map
+        if (config.sampleFastHeightmap && !shouldEarlyAbortQueuing && sampleUtils.noiseGeneratorSettings() != null) {
+            units += queueForLevel(chunks, 0, 256, (pos, y) -> new FastApproxHeightmapWorkUnit(chunkSampler, pos, sampleUtils, previewData));
+        }
+
         // Height map
         if (config.sampleHeightmap && !shouldEarlyAbortQueuing && sampleUtils.noiseGeneratorSettings() != null) {
             LongSet queuedChunks = new LongOpenHashSet(chunks.size());

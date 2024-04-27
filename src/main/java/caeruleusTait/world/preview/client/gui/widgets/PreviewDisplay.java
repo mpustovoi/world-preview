@@ -372,7 +372,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         // Load sections
         synchronized (storage) {
             while (true) {
-                long flag = renderSettings.showHeightMap ? PreviewStorage.FLAG_HEIGHT : PreviewStorage.FLAG_BIOME;
+                long flag = renderSettings.showHeightMap ? PreviewStorage.FLAG_FAST_HEIGHT : PreviewStorage.FLAG_BIOME;
                 flag = renderSettings.showIntersections ? PreviewStorage.FLAG_INTERSECT : flag;
                 int useY = renderSettings.showHeightMap ? 0 : quartY;
                 PreviewSection dataSection = storage.section4(quartX, useY, quartZ, flag);
