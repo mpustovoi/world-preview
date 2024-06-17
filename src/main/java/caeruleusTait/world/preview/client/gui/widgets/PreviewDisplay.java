@@ -57,6 +57,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
     private int[] colorMap;
     private int[] colorMapGrayScale;
     private int[] heightColorMap;
+    private int[] noiseColorMap;
     private boolean[] cavesMap;
     private IconData[] structureIcons;
     private IconData playerIcon;
@@ -145,6 +146,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         Arrays.stream(structureIcons).map(IconData::texture).forEach(DynamicTexture::upload);
         try {
             heightColorMap = dataProvider.heightColorMap();
+            noiseColorMap = dataProvider.noiseColorMap();
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -375,9 +377,8 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         // Load sections
         synchronized (storage) {
             while (true) {
-                long flag = renderSettings.showHeightMap ? PreviewStorage.FLAG_HEIGHT : PreviewStorage.FLAG_BIOME;
-                flag = renderSettings.showIntersections ? PreviewStorage.FLAG_INTERSECT : flag;
-                int useY = renderSettings.showHeightMap ? 0 : quartY;
+                long flag = renderSettings.mode.flag;
+                int useY = renderSettings.mode.useY ? quartY : 0;
                 PreviewSection dataSection = storage.section4(quartX, useY, quartZ, flag);
                 PreviewSection structureSection = storage.section4(quartX, 0, quartZ, PreviewStorage.FLAG_STRUCT_START);
                 PreviewSection.AccessData accessData = dataSection.calcQuartOffsetData(quartX, quartZ, maxQuartX, maxQuartZ);
@@ -430,22 +431,39 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                     // Read the biome data
                     short rawData = r.dataSection.get(x, z);
                     int color = 0xFF000000;
-                    if (rawData >= 0 && !renderSettings.showHeightMap && !renderSettings.showIntersections) {
-                        color = selectedBiomeId >= 0 || highlightCaves ? colorMapGrayScale[rawData] : colorMap[rawData];
-                        if (selectedBiomeId == rawData || (highlightCaves && cavesMap[rawData])) {
-                            color = colorMap[rawData];
+                    switch (renderSettings.mode) {
+                        case BIOMES -> {
+                            if (rawData >= 0) {
+                                color = selectedBiomeId >= 0 || highlightCaves ? colorMapGrayScale[rawData] : colorMap[rawData];
+                                if (selectedBiomeId == rawData || (highlightCaves && cavesMap[rawData])) {
+                                    color = colorMap[rawData];
+                                }
+                                workingVisibleBiomes[rawData] += 1;
+                            }
                         }
-                        workingVisibleBiomes[rawData] += 1;
-                    } else if (rawData > Short.MIN_VALUE && renderSettings.showHeightMap) {
-                        color = heightColorMap[rawData - dataProvider.yMin()];
-                    } else if (renderSettings.showIntersections && rawData >= 0) {
-                        // Main y-intersection
-                        color = MapColor.byId(rawData).col;
-                        color = textureColor(color == 0 ? 0xFFFFFF : color);
-                    } else if (renderSettings.showIntersections && rawData > Short.MIN_VALUE) {
-                        // See through one layer of air
-                        color = MapColor.byId(-rawData).col;
-                        color = highlightColor(textureColor(color == 0 ? 0xFFFFFF : color));
+                        case HEIGHTMAP -> {
+                            if (rawData > Short.MIN_VALUE) {
+                                color = heightColorMap[rawData - dataProvider.yMin()];
+                            }
+                        }
+                        case INTERSECTIONS -> {
+                            if (rawData >= 0) {
+                                // Main y-intersection
+                                color = MapColor.byId(rawData).col;
+                                color = textureColor(color == 0 ? 0xFFFFFF : color);
+                            } else if(rawData > Short.MIN_VALUE) {
+                                // See through one layer of air
+                                color = MapColor.byId(-rawData).col;
+                                color = highlightColor(textureColor(color == 0 ? 0xFFFFFF : color));
+                            }
+                        }
+                        case NOISE_TEMPERATURE, NOISE_HUMIDITY, NOISE_CONTINENTALNESS, NOISE_EROSION, NOISE_DEPTH, NOISE_WEIRDNESS -> {
+                            if (rawData > Short.MIN_VALUE) {
+                                final float data = ((float) rawData) / ((float) Short.MAX_VALUE);
+                                final int idx = Math.min(1023, Math.max(0, 512 + (int) (data * 512)));
+                                color = noiseColorMap[idx];
+                            }
+                        }
                     }
 
                     // Draw
@@ -619,10 +637,40 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         short height = workManager.previewStorage().getRawData4(quartX, 0, quartZ, PreviewStorage.FLAG_HEIGHT);
 
         if (biome < 0) {
-            return new HoverInfo(xMin + xPos, center.getY(), zMin + zPos, null, height);
+            return new HoverInfo(
+                    xMin + xPos, center.getY(), zMin + zPos, null, height,
+                    Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN
+            );
         }
 
-        return new HoverInfo(xMin + xPos, center.getY(), zMin + zPos, dataProvider.biome4Id(biome), height);
+        final short temperature = workManager.previewStorage().getRawData4(quartX, quartY, quartZ, PreviewStorage.FLAG_NOISE_TEMPERATURE);
+        final short humidity = workManager.previewStorage().getRawData4(quartX, quartY, quartZ, PreviewStorage.FLAG_NOISE_HUMIDITY);
+        final short continentalness = workManager.previewStorage().getRawData4(quartX, quartY, quartZ, PreviewStorage.FLAG_NOISE_CONTINENTALNESS);
+        final short erosion = workManager.previewStorage().getRawData4(quartX, quartY, quartZ, PreviewStorage.FLAG_NOISE_EROSION);
+        final short depth = workManager.previewStorage().getRawData4(quartX, quartY, quartZ, PreviewStorage.FLAG_NOISE_DEPTH);
+        final short weirdness = workManager.previewStorage().getRawData4(quartX, quartY, quartZ, PreviewStorage.FLAG_NOISE_WEIRDNESS);
+
+        if (temperature == Short.MIN_VALUE && humidity == Short.MIN_VALUE && continentalness == Short.MIN_VALUE && erosion == Short.MIN_VALUE && depth == Short.MIN_VALUE && weirdness == Short.MIN_VALUE) {
+            return new HoverInfo(
+                    xMin + xPos, center.getY(), zMin + zPos, dataProvider.biome4Id(biome), height,
+                    Double.NaN,
+                    Double.NaN,
+                    Double.NaN,
+                    Double.NaN,
+                    Double.NaN,
+                    Double.NaN
+            );
+        } else {
+            return new HoverInfo(
+                    xMin + xPos, center.getY(), zMin + zPos, dataProvider.biome4Id(biome), height,
+                    (double) temperature / Short.MAX_VALUE,
+                    (double) humidity / Short.MAX_VALUE,
+                    (double) continentalness / Short.MAX_VALUE,
+                    (double) erosion / Short.MAX_VALUE,
+                    (double) depth / Short.MAX_VALUE,
+                    (double) weirdness / Short.MAX_VALUE
+            );
+        }
     }
 
     private List<StructHoverHelperEntry> hoveredStructures(double mouseX, double mouseY) {
@@ -672,6 +720,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
 
         String blockPosTemplate = "§3X=§b%d§r §3Y=§b%d§r §3Z=§b%d§r";
 
+
         if (!structuresInfos.isEmpty()) {
             var structure = structuresInfos.get(0).structure;
             if (config.showControls) {
@@ -691,21 +740,34 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         }
 
         String height = hoverInfo.height > Short.MIN_VALUE ? String.format("§b%d§r", hoverInfo.height) : "§7<N/A>§r";
+        String noise = "";
+        if (!Double.isNaN(hoverInfo.temperature)) {
+            noise = "\n\n§3T=§b%.2f§r §3H=§b%.2f§r §3C=§b%.2f§r\n§3E=§b%.2f§r §3D=§b%.2f§r §3W=§b%.2f§r".formatted(
+                    hoverInfo.temperature,
+                    hoverInfo.humidity,
+                    hoverInfo.continentalness,
+                    hoverInfo.erosion,
+                    hoverInfo.depth,
+                    hoverInfo.weirdness
+            );
+        }
 
         if (config.showControls) {
             setTooltip(Tooltip.create(Component.translatable(
                     "world_preview.preview-display.tooltip.controls",
                     nameFormatter(hoverInfo.entry == null ? "<N/A>" : hoverInfo.entry.name()),
                     blockPosTemplate.formatted(hoverInfo.blockX, hoverInfo.blockY, hoverInfo.blockZ),
-                    height
+                    height,
+                    noise
             )));
         } else {
             setTooltip(Tooltip.create(Component.translatable(
                     "world_preview.preview-display.tooltip",
                     nameFormatter(hoverInfo.entry == null ? "<N/A>" : hoverInfo.entry.name()),
                     blockPosTemplate.formatted(hoverInfo.blockX, hoverInfo.blockY, hoverInfo.blockZ),
-                    height
-            )));
+                    height,
+                    noise
+                    )));
         }
     }
 
@@ -855,8 +917,19 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         // Nothing to do
     }
 
-    private record HoverInfo(int blockX, int blockY, int blockZ, BiomesList.BiomeEntry entry, short height) {
-    }
+    private record HoverInfo(
+            int blockX,
+            int blockY,
+            int blockZ,
+            BiomesList.BiomeEntry entry,
+            short height,
+            double temperature,
+            double humidity,
+            double continentalness,
+            double erosion,
+            double depth,
+            double weirdness
+    ) {}
 
     private record StructHoverHelperCell(List<StructHoverHelperEntry> entries) {
     }

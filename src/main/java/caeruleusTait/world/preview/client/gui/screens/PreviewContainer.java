@@ -18,6 +18,7 @@ import caeruleusTait.world.preview.client.gui.widgets.lists.StructuresList;
 import caeruleusTait.world.preview.mixin.client.ScreenAccessor;
 import com.mojang.blaze3d.platform.NativeImage;
 import it.unimi.dsi.fastutil.shorts.Short2LongMap;
+import net.fabricmc.fabric.impl.client.screen.ButtonList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.*;
@@ -57,6 +58,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static caeruleusTait.world.preview.RenderSettings.RenderMode.BIOMES;
+import static caeruleusTait.world.preview.RenderSettings.RenderMode.HEIGHTMAP;
+import static caeruleusTait.world.preview.RenderSettings.RenderMode.INTERSECTIONS;
+import static caeruleusTait.world.preview.RenderSettings.RenderMode.NOISE_CONTINENTALNESS;
+import static caeruleusTait.world.preview.RenderSettings.RenderMode.NOISE_DEPTH;
+import static caeruleusTait.world.preview.RenderSettings.RenderMode.NOISE_EROSION;
+import static caeruleusTait.world.preview.RenderSettings.RenderMode.NOISE_HUMIDITY;
+import static caeruleusTait.world.preview.RenderSettings.RenderMode.NOISE_TEMPERATURE;
+import static caeruleusTait.world.preview.RenderSettings.RenderMode.NOISE_WEIRDNESS;
 import static caeruleusTait.world.preview.WorldPreview.LOGGER;
 import static caeruleusTait.world.preview.client.WorldPreviewComponents.*;
 
@@ -69,7 +79,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
     public static final TagKey<Structure> DISPLAY_BY_DEFAULT = TagKey.create(Registries.STRUCTURE, new ResourceLocation("c", "display_on_map_by_default"));
 
     public static final ResourceLocation BUTTONS_TEXTURE = new ResourceLocation("world_preview:textures/gui/buttons.png");
-    public static final int BUTTONS_TEX_WIDTH = 320;
+    public static final int BUTTONS_TEX_WIDTH = 400;
     public static final int BUTTONS_TEX_HEIGHT = 60;
 
     public static final int LINE_HEIGHT = 20;
@@ -94,8 +104,12 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
     private final Button resetToZeroZero;
     private final ToggleButton toggleCaves;
     private final ToggleButton toggleShowStructures;
+    private final ToggleButton toggleBiomes;
+    private final ToggleButton toggleNoise;
     private final ToggleButton toggleHeightmap;
     private final ToggleButton toggleIntersections;
+    private final ToggleButton toggleExpand;
+    private final CycleButton<RenderSettings.RenderMode> noiseCycleButton;
     private final Button resetDefaultStructureVisibility;
     private final Button switchBiomes;
     private final Button switchStructures;
@@ -113,6 +127,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
     private NativeImage playerIcon;
     private NativeImage spawnIcon;
     private List<SeedsList.SeedEntry> seedEntries;
+    private ScreenRectangle lastScreenRectangle;
 
     private boolean inhibitUpdates = true;
     private boolean isUpdating = false;
@@ -251,19 +266,35 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         toggleShowStructures.active = false; // Deactivate first in case sampleStructures is off
         toRender.add(toggleShowStructures);
 
+        toggleBiomes = new ToggleButton(
+                0, 0, 20, 20, /* x, y, width, height */
+                360, 20, 20, 20, /* xTexStart, yTexStart, xDiffTex, yDiffTex */
+                BUTTONS_TEXTURE, BUTTONS_TEX_WIDTH, BUTTONS_TEX_HEIGHT, /* resourceLocation, textureWidth, textureHeight*/
+                x -> selectViewMode(BIOMES)
+        );
+        toggleBiomes.visible = false;
+        toggleBiomes.active = true;
+        toggleBiomes.setTooltip(Tooltip.create(BTN_TOGGLE_BIOMES));
+        toRender.add(toggleBiomes);
+
+        toggleNoise = new ToggleButton(
+                0, 0, 20, 20, /* x, y, width, height */
+                280, 20, 20, 20, /* xTexStart, yTexStart, xDiffTex, yDiffTex */
+                BUTTONS_TEXTURE, BUTTONS_TEX_WIDTH, BUTTONS_TEX_HEIGHT, /* resourceLocation, textureWidth, textureHeight*/
+                x -> selectViewMode(renderSettings.lastNoise)
+        );
+        toggleNoise.visible = false;
+        toggleNoise.active = false;
+        toggleNoise.setTooltip(Tooltip.create(BTN_TOGGLE_NOISE));
+        toRender.add(toggleNoise);
+
         toggleHeightmap = new ToggleButton(
                 0, 0, 20, 20, /* x, y, width, height */
                 200, 20, 20, 20, /* xTexStart, yTexStart, xDiffTex, yDiffTex */
                 BUTTONS_TEXTURE, BUTTONS_TEX_WIDTH, BUTTONS_TEX_HEIGHT, /* resourceLocation, textureWidth, textureHeight*/
-                x -> {
-                    renderSettings.showHeightMap = ((ToggleButton) x).selected;
-                    if (renderSettings.showHeightMap) {
-                        renderSettings.showIntersections = false;
-                        toggleIntersections().selected = false;
-                    }
-                }
+                x -> selectViewMode(HEIGHTMAP)
         );
-        toggleHeightmap.selected = renderSettings.showHeightMap && cfg.sampleHeightmap;
+        toggleHeightmap.visible = false;
         toggleHeightmap.active = false;
         toRender.add(toggleHeightmap);
 
@@ -271,17 +302,37 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
                 0, 0, 20, 20, /* x, y, width, height */
                 240, 20, 20, 20, /* xTexStart, yTexStart, xDiffTex, yDiffTex */
                 BUTTONS_TEXTURE, BUTTONS_TEX_WIDTH, BUTTONS_TEX_HEIGHT, /* resourceLocation, textureWidth, textureHeight*/
+                x -> selectViewMode(INTERSECTIONS)
+        );
+        toggleIntersections.active = false;
+        toggleIntersections.visible = false;
+        toRender.add(toggleIntersections);
+
+        noiseCycleButton = CycleButton
+                .builder(RenderSettings.RenderMode::toComponent)
+                .withValues(List.of(NOISE_TEMPERATURE, NOISE_HUMIDITY, NOISE_DEPTH, NOISE_CONTINENTALNESS, NOISE_WEIRDNESS, NOISE_EROSION))
+                .withInitialValue(renderSettings.lastNoise)
+                .create(0, 0, 200, 20, BTN_CYCLE_NOISE, (btn, val) -> selectViewMode(val));
+        noiseCycleButton.active = false;
+        noiseCycleButton.visible = false;
+        toRender.add(noiseCycleButton);
+
+        toggleExpand = new ToggleButton(
+                0, 0, 20, 20, /* x, y, width, height */
+                320, 20, 20, 20, /* xTexStart, yTexStart, xDiffTex, yDiffTex */
+                BUTTONS_TEXTURE, BUTTONS_TEX_WIDTH, BUTTONS_TEX_HEIGHT, /* resourceLocation, textureWidth, textureHeight*/
                 x -> {
-                    renderSettings.showIntersections = ((ToggleButton) x).selected;
-                    if (renderSettings.showIntersections) {
-                        renderSettings.showHeightMap = false;
-                        toggleHeightmap().selected = false;
-                    }
+                    final boolean expanded = ((ToggleButton) x).selected;
+                    toggleBiomes.visible = expanded;
+                    toggleNoise.visible = expanded;
+                    toggleIntersections.visible = expanded;
+                    toggleHeightmap.visible = expanded;
+                    noiseCycleButton.visible = expanded;
+                    doLayout(lastScreenRectangle);
                 }
         );
-        toggleIntersections.selected = renderSettings.showIntersections && cfg.sampleIntersections;
-        toggleIntersections.active = false;
-        toRender.add(toggleIntersections);
+        toggleExpand.setTooltip(Tooltip.create(BTN_TOGGLE_EXPAND));
+        toRender.add(toggleExpand);
 
         biomesList.setBiomeChangeListener(x -> {
             previewDisplay.setSelectedBiomeId(x == null ? -1 : x.id());
@@ -291,6 +342,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         dataProvider.registerSettingsChangeListener(this::updateSettings);
 
         onTabButtonChange(switchBiomes, DisplayType.BIOMES);
+        selectViewMode(BIOMES);
     }
 
 
@@ -326,6 +378,29 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         previewMappingData.update(defaults);
         previewMappingData.update(configured);
         updateSettings();
+    }
+
+    private void selectViewMode(RenderSettings.RenderMode mode) {
+        toggleBiomes.selected = false;
+        toggleHeightmap.selected = false;
+        toggleIntersections.selected = false;
+        toggleNoise.selected = false;
+        noiseCycleButton.active = false;
+
+        synchronized (renderSettings) {
+            switch (mode) {
+                case BIOMES -> toggleBiomes.selected = true;
+                case HEIGHTMAP -> toggleHeightmap.selected = true;
+                case INTERSECTIONS -> toggleIntersections.selected = true;
+                case NOISE_TEMPERATURE, NOISE_HUMIDITY, NOISE_CONTINENTALNESS, NOISE_EROSION, NOISE_DEPTH,
+                     NOISE_WEIRDNESS -> {
+                    renderSettings.lastNoise = mode;
+                    toggleNoise.selected = true;
+                    noiseCycleButton.active = true;
+                }
+            }
+            renderSettings.mode = mode;
+        }
     }
 
     private synchronized void updateSettings() {
@@ -591,7 +666,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         } else {
             toggleHeightmap.active = false;
             toggleHeightmap.setTooltip(Tooltip.create(BTN_TOGGLE_HEIGHTMAP_DISABLED));
-            renderSettings.showHeightMap = false;
+            renderSettings.mode = renderSettings.mode == HEIGHTMAP ? BIOMES : renderSettings.mode;
         }
 
         if (cfg.sampleIntersections) {
@@ -600,7 +675,16 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         } else {
             toggleIntersections.active = false;
             toggleIntersections.setTooltip(Tooltip.create(BTN_TOGGLE_INTERSECT_DISABLED));
-            renderSettings.showIntersections = false;
+            renderSettings.mode = renderSettings.mode == INTERSECTIONS ? BIOMES : renderSettings.mode;
+        }
+
+        if (cfg.storeNoiseSamples) {
+            toggleNoise.active = true;
+            toggleNoise.setTooltip(Tooltip.create(BTN_TOGGLE_NOISE));
+        } else {
+            toggleNoise.active = false;
+            toggleNoise.setTooltip(Tooltip.create(BTN_TOGGLE_NOISE_DISABLED));
+            renderSettings.mode = renderSettings.mode.isNoise() ? BIOMES : renderSettings.mode;
         }
 
         previewDisplay.reloadData();
@@ -734,13 +818,21 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
     }
 
     public void doLayout(ScreenRectangle screenRectangle) {
+        if (screenRectangle == null) {
+            screenRectangle = minecraft.screen.getRectangle();
+        }
+        lastScreenRectangle = screenRectangle;
+
         int leftWidth = Math.max(130, Math.min(180, screenRectangle.width() / 3));
         int left = screenRectangle.left() + 3;
+        int previewLeft = left + leftWidth + 3;
         int top = screenRectangle.top() + 2;
         int bottom = screenRectangle.bottom() - 32;
 
         // Preview
-        previewDisplay.setPosition(left + leftWidth + 3, top + 1);
+        final int expand = toggleExpand.selected ? 22 + 2 : 0;
+
+        previewDisplay.setPosition(previewLeft, top + expand + 1);
         previewDisplay.setSize(screenRectangle.right() - previewDisplay.getX() - 4, screenRectangle.bottom() - previewDisplay.getY() - 14);
 
         // BOTTOM
@@ -756,16 +848,23 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         saveSeed.setY(bottom);
 
         // TOP
-        int cycleWith = leftWidth - 22 * 5;
+        int cycleWith = leftWidth - 22 * 4;
 
         int btnStart = left + cycleWith + 2;
         settings.setPosition(left, top);
         int i = 0;
-        toggleIntersections.setPosition(btnStart + 22 * i++, top);
-        toggleHeightmap.setPosition(btnStart + 22 * i++, top);
         toggleShowStructures.setPosition(btnStart + 22 * i++, top);
         toggleCaves.setPosition(btnStart + 22 * i++, top);
         resetToZeroZero.setPosition(btnStart + 22 * i++, top);
+        toggleExpand.setPosition(btnStart + 22 * i++, top);
+
+        // TOP - hidden buttons
+        i = 0;
+        toggleBiomes.setPosition(previewLeft + 22 * i++, top);
+        toggleIntersections.setPosition(previewLeft + 22 * i++, top);
+        toggleHeightmap.setPosition(previewLeft + 22 * i++, top);
+        toggleNoise.setPosition(previewLeft + 22 * i++, top);
+        noiseCycleButton.setPosition(previewLeft + 22 * i++, top);
 
         //  - new row
         top += LINE_HEIGHT + LINE_VSPACE;
@@ -892,6 +991,17 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
             return black;
         }
         return colorMap.bake(workManager.yMin(), workManager.yMax(), cfg.heightmapMinY, cfg.heightmapMaxY);
+    }
+
+    @Override
+    public int[] noiseColorMap() {
+        ColorMap colorMap = previewData.colorMaps().get(cfg.colorMap);
+        if (colorMap == null) {
+            int[] black = new int[256];
+            Arrays.fill(black, 0xFF000000);
+            return black;
+        }
+        return colorMap.bake(1024);
     }
 
     @Override

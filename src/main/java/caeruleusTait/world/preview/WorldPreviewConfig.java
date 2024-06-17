@@ -16,6 +16,7 @@ public class WorldPreviewConfig {
     public boolean sampleStructures = false;
     public boolean sampleHeightmap = false;
     public boolean sampleIntersections = false;
+    public boolean storeNoiseSamples = false;
     public int heightmapMinY = 32;
     public int heightmapMaxY = 255;
     public boolean onlySampleInVisualRange = true;

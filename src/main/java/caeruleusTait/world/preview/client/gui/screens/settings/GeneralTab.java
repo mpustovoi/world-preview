@@ -42,6 +42,7 @@ public class GeneralTab extends GridLayoutTab {
         WGCheckbox cbStruct = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_STRUCT, x -> cfg.sampleStructures = x.selected(), cfg.sampleStructures);
         WGCheckbox cbHm = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_HEIGHTMAP, x -> cfg.sampleHeightmap = x.selected(), cfg.sampleHeightmap);
         WGCheckbox cbInt = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_INTERSECT, x -> cfg.sampleIntersections = x.selected(), cfg.sampleIntersections);
+        WGCheckbox cbNoise = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4,  LINE_HEIGHT, SETTINGS_GENERAL_NOISE, x -> cfg.storeNoiseSamples = x.selected(), cfg.storeNoiseSamples);
         WGCheckbox cbCtrl = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_CONTROLS, x -> cfg.showControls = x.selected(), cfg.showControls);
         WGCheckbox cbFt = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_FRAMETIME, x -> cfg.showFrameTime = x.selected(), cfg.showFrameTime);
         WGCheckbox cbPause = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_SHOW_IN_MENU, x -> cfg.showInPauseMenu = x.selected(), cfg.showInPauseMenu);
@@ -53,6 +54,7 @@ public class GeneralTab extends GridLayoutTab {
         cbStruct.setTooltip(Tooltip.create(SETTINGS_GENERAL_STRUCT_TOOLTIP));
         cbHm.setTooltip(Tooltip.create(SETTINGS_GENERAL_HEIGHTMAP_TOOLTIP));
         cbInt.setTooltip(Tooltip.create(SETTINGS_GENERAL_INTERSECT_TOOLTIP));
+        cbNoise.setTooltip(Tooltip.create(SETTINGS_GENERAL_NOISE_TOOLTIP));
         cbCtrl.setTooltip(Tooltip.create(SETTINGS_GENERAL_CONTROLS_TOOLTIP));
         cbFt.setTooltip(Tooltip.create(SETTINGS_GENERAL_FRAMETIME_TOOLTIP));
         cbPause.setTooltip(Tooltip.create(SETTINGS_GENERAL_SHOW_IN_MENU_TOOLTIP));
@@ -66,6 +68,7 @@ public class GeneralTab extends GridLayoutTab {
         rowHelper.addChild(cbStruct, 1);
         rowHelper.addChild(cbHm, 1);
         rowHelper.addChild(cbInt, 1);
+        rowHelper.addChild(cbNoise, 1);
         rowHelper.addChild(new WGLabel(minecraft.font, 0, 0, 200, LINE_HEIGHT / 10, WGLabel.TextAlignment.CENTER, Component.literal(""), 0xFFFFFF), 2);
         rowHelper.addChild(cbCtrl);
         rowHelper.addChild(cbFt);

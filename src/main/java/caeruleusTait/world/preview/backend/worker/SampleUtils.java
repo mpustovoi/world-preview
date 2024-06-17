@@ -1,6 +1,7 @@
 package caeruleusTait.world.preview.backend.worker;
 
 import caeruleusTait.world.preview.WorldPreview;
+import caeruleusTait.world.preview.WorldPreviewConfig;
 import caeruleusTait.world.preview.backend.storage.PreviewLevel;
 import caeruleusTait.world.preview.backend.stubs.DummyMinecraftServer;
 import caeruleusTait.world.preview.backend.stubs.EmptyAquifer;
@@ -31,6 +32,8 @@ import net.minecraft.world.level.*;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
@@ -86,6 +89,7 @@ public class SampleUtils implements AutoCloseable {
     private final ResourceKey<Level> dimension;
     private final NoiseGeneratorSettings noiseGeneratorSettings;
     private final MinecraftServer minecraftServer;
+    private final WorldPreviewConfig cfg;
 
     /**
      * Create SampleUtils with a <b>real</b> Minecraft server
@@ -98,6 +102,7 @@ public class SampleUtils implements AutoCloseable {
             LevelStem levelStem,
             LevelHeightAccessor levelHeightAccessor
     ) throws IOException {
+        this.cfg = WorldPreview.get().cfg();
         this.tempDir = null;
         this.minecraftServer = server;
         this.dataFixer = minecraftServer.getFixerUpper();
@@ -172,6 +177,7 @@ public class SampleUtils implements AutoCloseable {
             Proxy proxy,
             @Nullable Path tempDataPackDir
     ) throws IOException {
+        this.cfg = WorldPreview.get().cfg();
         try {
             tempDir = Files.createTempDirectory("world_preview");
         } catch (IOException e) {
@@ -352,6 +358,54 @@ public class SampleUtils implements AutoCloseable {
         return minecraftServer.getPlayerList().getPlayer(playerId);
     }
 
+    public record BiomeResult(ResourceKey<Biome> biome, short[] noiseResult) {}
+
+    private static short doubleToShort(double val) {
+        return (short) Math.min(Short.MAX_VALUE, Math.max(Short.MIN_VALUE, (long) (val * (double)Short.MAX_VALUE)));
+    }
+
+    public boolean hasRawNoiseInfo() {
+        return cfg.storeNoiseSamples && biomeSource instanceof MultiNoiseBiomeSource;
+    }
+
+    public BiomeResult doSample(BlockPos pos) {
+        final Climate.Sampler sampler = randomState.sampler();
+        if (hasRawNoiseInfo()) {
+            final var singlePointContext = new DensityFunction.SinglePointContext(pos.getX(), pos.getY(), pos.getZ());
+            final double temperature = sampler.temperature().compute(singlePointContext);
+            final double humidity = sampler.humidity().compute(singlePointContext);
+            final double continentalness = sampler.continentalness().compute(singlePointContext);
+            final double erosion = sampler.erosion().compute(singlePointContext);
+            final double depth = sampler.depth().compute(singlePointContext);
+            final double weirdness = sampler.weirdness().compute(singlePointContext);
+
+            final short[] noiseData = new short[] {
+                    doubleToShort(temperature),
+                    doubleToShort(humidity),
+                    doubleToShort(continentalness),
+                    doubleToShort(erosion),
+                    doubleToShort(depth),
+                    doubleToShort(weirdness),
+            };
+
+            final var targetPoint = Climate.target((float) temperature, (float) humidity, (float) continentalness, (float) erosion, (float) depth, (float) weirdness);
+            final MultiNoiseBiomeSource noiseBiomeSource = (MultiNoiseBiomeSource) biomeSource;
+            final Holder<Biome> biome = noiseBiomeSource.getNoiseBiome(targetPoint);
+            return new BiomeResult(biome.unwrapKey().orElseThrow(), noiseData);
+        } else {
+            return new BiomeResult(
+                    biomeSource.getNoiseBiome(
+                            QuartPos.fromBlock(pos.getX()),
+                            QuartPos.fromBlock(pos.getY()),
+                            QuartPos.fromBlock(pos.getZ()),
+                            randomState.sampler()
+                    ).unwrapKey().orElseThrow(),
+                    null
+            );
+        }
+    }
+
+    /*
     public ResourceKey<Biome> doSample(BlockPos pos) {
         return biomeSource.getNoiseBiome(
                 QuartPos.fromBlock(pos.getX()),
@@ -360,6 +414,7 @@ public class SampleUtils implements AutoCloseable {
                 randomState.sampler()
         ).unwrapKey().orElseThrow();
     }
+     */
 
     public List<Pair<ResourceLocation, StructureStart>> doStructures(ChunkPos chunkPos) {
         ProtoChunk protoChunk = (ProtoChunk) previewLevel.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false);
