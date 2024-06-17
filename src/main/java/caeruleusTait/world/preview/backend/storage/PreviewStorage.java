@@ -33,7 +33,14 @@ public class PreviewStorage implements Serializable {
     public static final long FLAG_STRUCT_START = 0b0001;
     public static final long FLAG_HEIGHT = 0b0010;
     public static final long FLAG_INTERSECT = 0b0011;
-    public static final long FLAG_STRUCT_REF = 0b1111;
+    public static final long FLAG_NOISE = 0b1000;
+    public static final long FLAG_NOISE_TEMPERATURE = 0b1001;
+    public static final long FLAG_NOISE_HUMIDITY = 0b1010;
+    public static final long FLAG_NOISE_CONTINENTALNESS = 0b1011;
+    public static final long FLAG_NOISE_EROSION = 0b1100;
+    public static final long FLAG_NOISE_DEPTH = 0b1101;
+    public static final long FLAG_NOISE_WEIRDNESS = 0b1110;
+    public static final long FLAG_STRUCT_REF = 0b0100;
 
     private transient Long2ObjectMap<PreviewBlock>[] blocks;
 

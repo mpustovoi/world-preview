@@ -5,11 +5,21 @@ import caeruleusTait.world.preview.backend.sampler.FullQuartSampler;
 import caeruleusTait.world.preview.backend.sampler.QuarterQuartSampler;
 import caeruleusTait.world.preview.backend.sampler.SingleQuartSampler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.IntFunction;
 
 import static caeruleusTait.world.preview.backend.WorkManager.Y_BLOCK_STRIDE;
+import static caeruleusTait.world.preview.backend.storage.PreviewStorage.FLAG_BIOME;
+import static caeruleusTait.world.preview.backend.storage.PreviewStorage.FLAG_HEIGHT;
+import static caeruleusTait.world.preview.backend.storage.PreviewStorage.FLAG_INTERSECT;
+import static caeruleusTait.world.preview.backend.storage.PreviewStorage.FLAG_NOISE_CONTINENTALNESS;
+import static caeruleusTait.world.preview.backend.storage.PreviewStorage.FLAG_NOISE_DEPTH;
+import static caeruleusTait.world.preview.backend.storage.PreviewStorage.FLAG_NOISE_EROSION;
+import static caeruleusTait.world.preview.backend.storage.PreviewStorage.FLAG_NOISE_HUMIDITY;
+import static caeruleusTait.world.preview.backend.storage.PreviewStorage.FLAG_NOISE_TEMPERATURE;
+import static caeruleusTait.world.preview.backend.storage.PreviewStorage.FLAG_NOISE_WEIRDNESS;
 
 /**
  * Transient settings
@@ -22,8 +32,8 @@ public class RenderSettings {
     public ResourceLocation dimension = null;
 
     public boolean hideAllStructures = false;
-    public transient boolean showHeightMap = false;
-    public transient boolean showIntersections = false;
+    public transient RenderMode mode = RenderMode.BIOMES;
+    public transient RenderMode lastNoise = RenderMode.NOISE_TEMPERATURE;
 
     public BlockPos center() {
         return center;
@@ -82,6 +92,37 @@ public class RenderSettings {
                 quartStride = 4;
             }
             default -> throw new RuntimeException("Invalid blocksPerChunk=" + blocksPerChunk);
+        }
+    }
+
+    public enum RenderMode {
+        BIOMES(FLAG_BIOME, true),
+        HEIGHTMAP(FLAG_HEIGHT, false),
+        INTERSECTIONS(FLAG_INTERSECT, true),
+
+        NOISE_TEMPERATURE(FLAG_NOISE_TEMPERATURE, true),
+        NOISE_HUMIDITY(FLAG_NOISE_HUMIDITY, true),
+        NOISE_CONTINENTALNESS(FLAG_NOISE_CONTINENTALNESS, true),
+        NOISE_EROSION(FLAG_NOISE_EROSION, true),
+        NOISE_DEPTH(FLAG_NOISE_DEPTH, true),
+        NOISE_WEIRDNESS(FLAG_NOISE_WEIRDNESS, true),
+
+        ;
+
+        public final long flag;
+        public final boolean useY;
+
+        RenderMode(long flag, boolean useY) {
+            this.flag = flag;
+            this.useY = useY;
+        }
+
+        public boolean isNoise() {
+            return this.name().startsWith("NOISE");
+        }
+
+        public Component toComponent() {
+            return Component.literal(name().replace("NOISE_", ""));
         }
     }
 

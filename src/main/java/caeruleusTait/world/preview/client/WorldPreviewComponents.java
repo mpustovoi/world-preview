@@ -20,10 +20,15 @@ public class WorldPreviewComponents {
     public static final Component BTN_TOGGLE_STRUCTURES_DISABLED = Component.translatable("world_preview.preview.btn-toggle-structures.disabled");
     public static final Component BTN_RESET_STRUCTURES = Component.translatable("world_preview.preview.btn-reset-structures");
     public static final Component BTN_RESET_STRUCTURES_TOOLTIP = Component.translatable("world_preview.preview.btn-reset-structures.tooltip");
+    public static final Component BTN_TOGGLE_BIOMES = Component.translatable("world_preview.preview.btn-toggle-biomes");
+    public static final Component BTN_TOGGLE_NOISE = Component.translatable("world_preview.preview.btn-toggle-noise");
+    public static final Component BTN_TOGGLE_NOISE_DISABLED = Component.translatable("world_preview.preview.btn-toggle-noise.disabled");
     public static final Component BTN_TOGGLE_HEIGHTMAP = Component.translatable("world_preview.preview.btn-toggle-heightmap");
     public static final Component BTN_TOGGLE_HEIGHTMAP_DISABLED = Component.translatable("world_preview.preview.btn-toggle-heightmap.disabled");
     public static final Component BTN_TOGGLE_INTERSECT = Component.translatable("world_preview.preview.btn-toggle-intersect");
     public static final Component BTN_TOGGLE_INTERSECT_DISABLED = Component.translatable("world_preview.preview.btn-toggle-intersect.disabled");
+    public static final Component BTN_TOGGLE_EXPAND =  Component.translatable("world_preview.preview.btn-toggle-expand");
+    public static final Component BTN_CYCLE_NOISE =  Component.translatable("world_preview.preview.btn-cycle-noise");
 
     // Error message on setup
     public static final Component MSG_ERROR_SETUP_FAILED = Component.translatable("world_preview.preview.error.setup-failed");
@@ -44,6 +49,8 @@ public class WorldPreviewComponents {
     public static final Component SETTINGS_GENERAL_HEIGHTMAP_TOOLTIP = Component.translatable("world_preview.settings.general.heightmap.tooltip");
     public static final Component SETTINGS_GENERAL_INTERSECT = Component.translatable("world_preview.settings.general.intersect");
     public static final Component SETTINGS_GENERAL_INTERSECT_TOOLTIP = Component.translatable("world_preview.settings.general.intersect.tooltip");
+    public static final Component SETTINGS_GENERAL_NOISE = Component.translatable("world_preview.settings.general.noise");
+    public static final Component SETTINGS_GENERAL_NOISE_TOOLTIP = Component.translatable("world_preview.settings.general.noise.tooltip");
     public static final Component SETTINGS_GENERAL_FC_TOOLTIP = Component.translatable("world_preview.settings.general.full.chunk.tooltip");
     public static final Component SETTINGS_GENERAL_BG = Component.translatable("world_preview.settings.general.background");
     public static final Component SETTINGS_GENERAL_BG_TOOLTIP = Component.translatable("world_preview.settings.general.background.tooltip");

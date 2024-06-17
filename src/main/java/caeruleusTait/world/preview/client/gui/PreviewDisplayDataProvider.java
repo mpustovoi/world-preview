@@ -37,6 +37,8 @@ public interface PreviewDisplayDataProvider {
 
     int[] heightColorMap();
 
+    int[] noiseColorMap();
+
     int yMin();
 
     int yMax();

@@ -98,6 +98,16 @@ public class ColorMap {
         return res;
     }
 
+    public int[] bake(int numValues) {
+        int[] res = new int[numValues];
+
+        for (int i = 0; i < numValues; ++i) {
+            res[i] = getARGB((float)(i) / numValues);
+        }
+
+        return res;
+    }
+
     static float[] RGBToXYZ(float[] out, float r, float g, float b) {
         final float R = (r > 0.04045 ? (float) Math.pow((r + 0.055f) / 1.055f, 2.4f) : r / 12.92f) * 100;
         final float G = (g > 0.04045 ? (float) Math.pow((g + 0.055f) / 1.055f, 2.4f) : g / 12.92f) * 100;
