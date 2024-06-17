@@ -42,6 +42,7 @@ public class GeneralTab extends GridLayoutTab {
         Checkbox cbStruct = Checkbox.builder(SETTINGS_GENERAL_STRUCT,       minecraft.font).selected(cfg.sampleStructures         ).onValueChange((box, val) -> cfg.sampleStructures          = val).build();
         Checkbox cbHm     = Checkbox.builder(SETTINGS_GENERAL_HEIGHTMAP,    minecraft.font).selected(cfg.sampleHeightmap          ).onValueChange((box, val) -> cfg.sampleHeightmap           = val).build();
         Checkbox cbInt    = Checkbox.builder(SETTINGS_GENERAL_INTERSECT,    minecraft.font).selected(cfg.sampleIntersections      ).onValueChange((box, val) -> cfg.sampleIntersections       = val).build();
+        Checkbox cbNoise  = Checkbox.builder(SETTINGS_GENERAL_NOISE,        minecraft.font).selected(cfg.storeNoiseSamples        ).onValueChange((box, val) -> cfg.storeNoiseSamples         = val).build();
         Checkbox cbCtrl   = Checkbox.builder(SETTINGS_GENERAL_CONTROLS,     minecraft.font).selected(cfg.showControls             ).onValueChange((box, val) -> cfg.showControls              = val).build();
         Checkbox cbFt     = Checkbox.builder(SETTINGS_GENERAL_FRAMETIME,    minecraft.font).selected(cfg.showFrameTime            ).onValueChange((box, val) -> cfg.showFrameTime             = val).build();
         Checkbox cbPause  = Checkbox.builder(SETTINGS_GENERAL_SHOW_IN_MENU, minecraft.font).selected(cfg.showInPauseMenu          ).onValueChange((box, val) -> cfg.showInPauseMenu           = val).build();
@@ -53,6 +54,7 @@ public class GeneralTab extends GridLayoutTab {
         cbStruct.setTooltip(Tooltip.create(SETTINGS_GENERAL_STRUCT_TOOLTIP));
         cbHm.setTooltip(Tooltip.create(SETTINGS_GENERAL_HEIGHTMAP_TOOLTIP));
         cbInt.setTooltip(Tooltip.create(SETTINGS_GENERAL_INTERSECT_TOOLTIP));
+        cbNoise.setTooltip(Tooltip.create(SETTINGS_GENERAL_NOISE_TOOLTIP));
         cbCtrl.setTooltip(Tooltip.create(SETTINGS_GENERAL_CONTROLS_TOOLTIP));
         cbFt.setTooltip(Tooltip.create(SETTINGS_GENERAL_FRAMETIME_TOOLTIP));
         cbPause.setTooltip(Tooltip.create(SETTINGS_GENERAL_SHOW_IN_MENU_TOOLTIP));
@@ -66,6 +68,7 @@ public class GeneralTab extends GridLayoutTab {
         rowHelper.addChild(cbStruct, 1);
         rowHelper.addChild(cbHm, 1);
         rowHelper.addChild(cbInt, 1);
+        rowHelper.addChild(cbNoise, 1);
         rowHelper.addChild(new WGLabel(minecraft.font, 0, 0, 200, LINE_HEIGHT / 10, WGLabel.TextAlignment.CENTER, Component.literal(""), 0xFFFFFF), 2);
         rowHelper.addChild(cbCtrl);
         rowHelper.addChild(cbFt);
