@@ -360,8 +360,8 @@ public class SampleUtils implements AutoCloseable {
 
     public record BiomeResult(ResourceKey<Biome> biome, short[] noiseResult) {}
 
-    private static short doubleToShort(double val) {
-        return (short) Math.min(Short.MAX_VALUE, Math.max(Short.MIN_VALUE, (long) (val * (double)Short.MAX_VALUE)));
+    private static short doubleToShort(double val, double factor) {
+        return (short) Math.min(Short.MAX_VALUE, Math.max(Short.MIN_VALUE, (long) (val * factor * (double)Short.MAX_VALUE)));
     }
 
     public boolean hasRawNoiseInfo() {
@@ -380,12 +380,12 @@ public class SampleUtils implements AutoCloseable {
             final double weirdness = sampler.weirdness().compute(singlePointContext);
 
             final short[] noiseData = new short[] {
-                    doubleToShort(temperature),
-                    doubleToShort(humidity),
-                    doubleToShort(continentalness),
-                    doubleToShort(erosion),
-                    doubleToShort(depth),
-                    doubleToShort(weirdness),
+                    doubleToShort(temperature, 1),
+                    doubleToShort(humidity, 1),
+                    doubleToShort(continentalness, 0.5),
+                    doubleToShort(erosion, 1),
+                    doubleToShort(depth, 0.5),
+                    doubleToShort(weirdness, 0.75),
             };
 
             final var targetPoint = Climate.target((float) temperature, (float) humidity, (float) continentalness, (float) erosion, (float) depth, (float) weirdness);

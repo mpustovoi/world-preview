@@ -663,12 +663,12 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         } else {
             return new HoverInfo(
                     xMin + xPos, center.getY(), zMin + zPos, dataProvider.biome4Id(biome), height,
-                    (double) temperature / Short.MAX_VALUE,
-                    (double) humidity / Short.MAX_VALUE,
-                    (double) continentalness / Short.MAX_VALUE,
-                    (double) erosion / Short.MAX_VALUE,
-                    (double) depth / Short.MAX_VALUE,
-                    (double) weirdness / Short.MAX_VALUE
+                    (double) temperature / 1.0 / Short.MAX_VALUE,
+                    (double) humidity / 1.0 / Short.MAX_VALUE,
+                    (double) continentalness / 0.5 / Short.MAX_VALUE,
+                    (double) erosion / 1.0 / Short.MAX_VALUE,
+                    (double) depth / 0.5 / Short.MAX_VALUE,
+                    (double) weirdness / 0.75 / Short.MAX_VALUE
             );
         }
     }
