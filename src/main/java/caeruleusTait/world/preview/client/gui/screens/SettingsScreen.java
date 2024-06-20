@@ -27,9 +27,9 @@ import java.util.stream.Collectors;
 import static caeruleusTait.world.preview.client.WorldPreviewComponents.SETTINGS_TITLE;
 
 public class SettingsScreen extends Screen {
-    public static final ResourceLocation HEADER_SEPERATOR = new ResourceLocation("textures/gui/header_separator.png");
-    public static final ResourceLocation FOOTER_SEPERATOR = new ResourceLocation("textures/gui/footer_separator.png");
-    public static final ResourceLocation LIGHT_DIRT_BACKGROUND = new ResourceLocation("textures/gui/light_dirt_background.png");
+    public static final ResourceLocation HEADER_SEPERATOR = ResourceLocation.parse("textures/gui/header_separator.png");
+    public static final ResourceLocation FOOTER_SEPERATOR = ResourceLocation.parse("textures/gui/footer_separator.png");
+    public static final ResourceLocation LIGHT_DIRT_BACKGROUND = ResourceLocation.parse("textures/gui/light_dirt_background.png");
 
     private final Screen lastScreen;
     private final PreviewContainer previewContainer;

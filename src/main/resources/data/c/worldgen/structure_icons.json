@@ -73,6 +73,9 @@
   "minecraft:stronghold": {
     "item": "minecraft:ender_eye"
   },
+  "minecraft:trial_chambers": {
+    "item": "trial_key"
+  },
   "minecraft:igloo": {
     "texture": "world_preview:textures/structure/igloo.png"
   },

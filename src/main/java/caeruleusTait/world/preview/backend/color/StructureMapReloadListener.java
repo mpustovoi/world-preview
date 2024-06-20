@@ -43,12 +43,7 @@ public class StructureMapReloadListener extends BaseMultiJsonResourceReloadListe
         final JsonObject obj = jsonElement.getAsJsonObject();
 
         for (var entry : obj.entrySet()) {
-            final ResourceLocation location;
-            if (entry.getKey().indexOf(':') < 0) {
-                location = new ResourceLocation(namespace, entry.getKey());
-            } else {
-                location = new ResourceLocation(entry.getKey());
-            }
+            final ResourceLocation location = ResourceLocation.parse(entry.getKey());
             final PreviewMappingData.StructureEntry value = new PreviewMappingData.StructureEntry();
             final JsonElement rawEl = entry.getValue();
 

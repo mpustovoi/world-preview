@@ -114,7 +114,7 @@ public class PreviewMappingData {
                 resourceOnlyColor = color;
             }
 
-            ResourceLocation biomeRes = new ResourceLocation(biome);
+            ResourceLocation biomeRes = ResourceLocation.parse(biome);
             res.biomeId2BiomeData()[id] = new PreviewData.BiomeData(
                     id,
                     biomeRes,
@@ -141,13 +141,13 @@ public class PreviewMappingData {
                 structure.showByDefault = Optional.empty();
             }
 
-            ResourceLocation structureRes = new ResourceLocation(structTag);
+            ResourceLocation structureRes = ResourceLocation.parse(structTag);
             res.structId2StructData()[id] = new PreviewData.StructureData(
                     id,
                     structureRes,
                     structure.name,
-                    structure.texture == null ? null : new ResourceLocation(structure.texture),
-                    structure.item == null ? null : new ResourceLocation(structure.item),
+                    structure.texture == null ? null : ResourceLocation.parse(structure.texture),
+                    structure.item == null ? null : ResourceLocation.parse(structure.item),
                     structure.showByDefault.orElse(displayByDefaultStructuresSet.contains(structureRes)),
                     structure.dataSource
             );

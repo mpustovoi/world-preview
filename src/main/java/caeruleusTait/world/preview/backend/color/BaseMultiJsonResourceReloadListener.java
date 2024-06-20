@@ -32,10 +32,10 @@ public abstract class BaseMultiJsonResourceReloadListener extends SimplePreparab
         Map<ResourceLocation, List<JsonElement>> res = new HashMap<>();
 
         for (String namespace : resourceManager.getNamespaces()) {
-            loadAllForLocation(resourceManager, res, new ResourceLocation(namespace, filename));
+            loadAllForLocation(resourceManager, res, ResourceLocation.fromNamespaceAndPath(namespace, filename));
         }
 
-        loadAllForLocation(resourceManager, res, new ResourceLocation("c", "worldgen/" + filename));
+        loadAllForLocation(resourceManager, res, ResourceLocation.fromNamespaceAndPath("c", "worldgen/" + filename));
 
         return res;
     }

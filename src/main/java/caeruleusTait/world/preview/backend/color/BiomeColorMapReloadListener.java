@@ -66,12 +66,7 @@ public class BiomeColorMapReloadListener extends BaseMultiJsonResourceReloadList
         final JsonObject obj = jsonElement.getAsJsonObject();
 
         for (var entry : obj.entrySet()) {
-            final ResourceLocation location;
-            if (entry.getKey().indexOf(':') < 0) {
-                location = new ResourceLocation(namespace, entry.getKey());
-            } else {
-                location = new ResourceLocation(entry.getKey());
-            }
+            final ResourceLocation location = ResourceLocation.parse(entry.getKey());
             final PreviewMappingData.ColorEntry value = new PreviewMappingData.ColorEntry();
             final JsonElement rawEl = entry.getValue();
 

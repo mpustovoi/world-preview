@@ -19,7 +19,6 @@ import caeruleusTait.world.preview.client.gui.widgets.lists.StructuresList;
 import caeruleusTait.world.preview.mixin.client.ScreenAccessor;
 import com.mojang.blaze3d.platform.NativeImage;
 import it.unimi.dsi.fastutil.shorts.Short2LongMap;
-import net.fabricmc.fabric.impl.client.screen.ButtonList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -109,13 +108,13 @@ import static caeruleusTait.world.preview.client.WorldPreviewComponents.TITLE;
 
 public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvider {
 
-    public static final TagKey<Biome> C_CAVE = TagKey.create(Registries.BIOME, new ResourceLocation("c", "caves"));
-    public static final TagKey<Biome> C_IS_CAVE = TagKey.create(Registries.BIOME, new ResourceLocation("c", "is_cave"));
-    public static final TagKey<Biome> FORGE_CAVE = TagKey.create(Registries.BIOME, new ResourceLocation("forge", "caves"));
-    public static final TagKey<Biome> FORGE_IS_CAVE = TagKey.create(Registries.BIOME, new ResourceLocation("forge", "is_cave"));
-    public static final TagKey<Structure> DISPLAY_BY_DEFAULT = TagKey.create(Registries.STRUCTURE, new ResourceLocation("c", "display_on_map_by_default"));
+    public static final TagKey<Biome> C_CAVE = TagKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("c", "caves"));
+    public static final TagKey<Biome> C_IS_CAVE = TagKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("c", "is_cave"));
+    public static final TagKey<Biome> FORGE_CAVE = TagKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("forge", "caves"));
+    public static final TagKey<Biome> FORGE_IS_CAVE = TagKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("forge", "is_cave"));
+    public static final TagKey<Structure> DISPLAY_BY_DEFAULT = TagKey.create(Registries.STRUCTURE, ResourceLocation.fromNamespaceAndPath("c", "display_on_map_by_default"));
 
-    public static final ResourceLocation BUTTONS_TEXTURE = new ResourceLocation("world_preview:textures/gui/buttons.png");
+    public static final ResourceLocation BUTTONS_TEXTURE = ResourceLocation.parse("world_preview:textures/gui/buttons.png");
     public static final int BUTTONS_TEX_WIDTH = 400;
     public static final int BUTTONS_TEX_HEIGHT = 60;
 
@@ -615,7 +614,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
             PreviewData.StructureData data = previewData.structId2StructData()[i];
             allStructureIcons[i] = icons.computeIfAbsent(data.icon(), x -> {
                 if (x == null) {
-                    x = new ResourceLocation("world_preview:textures/structure/unknown.png");
+                    x = ResourceLocation.parse("world_preview:textures/structure/unknown.png");
                 }
                 Optional<Resource> resource = builtinResourceManager.getResource(x);
                 if (resource.isEmpty()) {
@@ -623,7 +622,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
                 }
                 if (resource.isEmpty()) {
                     LOGGER.error("Failed to load structure icon: '{}'", x);
-                    resource = builtinResourceManager.getResource(new ResourceLocation("world_preview:textures/structure/unknown.png"));
+                    resource = builtinResourceManager.getResource(ResourceLocation.parse("world_preview:textures/structure/unknown.png"));
                 }
                 if (resource.isEmpty()) {
                     LOGGER.error("FATAL ERROR LOADING: '{}' -- unable to load fallback!", x);
@@ -643,8 +642,8 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         //  - Player and spawn icon
         final Optional<Resource> playerResource;
         final Optional<Resource> spawnResource;
-        playerResource = builtinResourceManager.getResource(new ResourceLocation("world_preview:textures/etc/player.png"));
-        spawnResource = builtinResourceManager.getResource(new ResourceLocation("world_preview:textures/etc/bed.png"));
+        playerResource = builtinResourceManager.getResource(ResourceLocation.parse("world_preview:textures/etc/player.png"));
+        spawnResource = builtinResourceManager.getResource(ResourceLocation.parse("world_preview:textures/etc/bed.png"));
         try {
             try(InputStream inPlayer = playerResource.orElseThrow().open(); InputStream inSpawn = spawnResource.orElseThrow().open()) {
                 playerIcon = NativeImage.read(inPlayer);
