@@ -65,6 +65,7 @@ import static caeruleusTait.world.preview.RenderSettings.RenderMode.NOISE_CONTIN
 import static caeruleusTait.world.preview.RenderSettings.RenderMode.NOISE_DEPTH;
 import static caeruleusTait.world.preview.RenderSettings.RenderMode.NOISE_EROSION;
 import static caeruleusTait.world.preview.RenderSettings.RenderMode.NOISE_HUMIDITY;
+import static caeruleusTait.world.preview.RenderSettings.RenderMode.NOISE_PEAKS_AND_VALLEYS;
 import static caeruleusTait.world.preview.RenderSettings.RenderMode.NOISE_TEMPERATURE;
 import static caeruleusTait.world.preview.RenderSettings.RenderMode.NOISE_WEIRDNESS;
 import static caeruleusTait.world.preview.WorldPreview.LOGGER;
@@ -310,7 +311,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
 
         noiseCycleButton = CycleButton
                 .builder(RenderSettings.RenderMode::toComponent)
-                .withValues(List.of(NOISE_TEMPERATURE, NOISE_HUMIDITY, NOISE_DEPTH, NOISE_CONTINENTALNESS, NOISE_WEIRDNESS, NOISE_EROSION))
+                .withValues(List.of(NOISE_TEMPERATURE, NOISE_HUMIDITY, NOISE_DEPTH, NOISE_CONTINENTALNESS, NOISE_WEIRDNESS, NOISE_EROSION, NOISE_PEAKS_AND_VALLEYS))
                 .withInitialValue(renderSettings.lastNoise)
                 .create(0, 0, 200, 20, BTN_CYCLE_NOISE, (btn, val) -> selectViewMode(val));
         noiseCycleButton.active = false;
@@ -393,7 +394,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
                 case HEIGHTMAP -> toggleHeightmap.selected = true;
                 case INTERSECTIONS -> toggleIntersections.selected = true;
                 case NOISE_TEMPERATURE, NOISE_HUMIDITY, NOISE_CONTINENTALNESS, NOISE_EROSION, NOISE_DEPTH,
-                     NOISE_WEIRDNESS -> {
+                     NOISE_WEIRDNESS, NOISE_PEAKS_AND_VALLEYS -> {
                     renderSettings.lastNoise = mode;
                     toggleNoise.selected = true;
                     noiseCycleButton.active = true;
