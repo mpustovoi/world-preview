@@ -714,6 +714,8 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
             renderSettings.mode = renderSettings.mode.isNoise() ? BIOMES : renderSettings.mode;
         }
 
+        selectViewMode(renderSettings.mode);
+
         previewDisplay.reloadData();
         previewDisplay.setSelectedBiomeId((short) -1);
         previewDisplay.setHighlightCaves(false);
