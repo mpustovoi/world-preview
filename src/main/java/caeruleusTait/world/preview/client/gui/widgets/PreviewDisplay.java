@@ -29,6 +29,8 @@ import net.minecraft.core.QuartPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.levelgen.NoiseRouter;
+import net.minecraft.world.level.levelgen.NoiseRouterData;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.material.MapColor;
 import org.jetbrains.annotations.NotNull;
@@ -464,6 +466,14 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                                 color = noiseColorMap[idx];
                             }
                         }
+                        case NOISE_PEAKS_AND_VALLEYS -> {
+                            if (rawData > Short.MIN_VALUE) {
+                                final float data = ((float) rawData) / 0.5f / ((float) Short.MAX_VALUE);
+                                final float pvData = NoiseRouterData.peaksAndValleys(Math.min(1.0f, Math.max(-1.0f, data)));
+                                final int idx = Math.min(1023, Math.max(0, 512 + (int) (pvData * 512)));
+                                color = noiseColorMap[idx];
+                            }
+                        }
                     }
 
                     // Draw
@@ -639,7 +649,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         if (biome < 0) {
             return new HoverInfo(
                     xMin + xPos, center.getY(), zMin + zPos, null, height,
-                    Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN
+                    Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN
             );
         }
 
@@ -658,24 +668,19 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                     Double.NaN,
                     Double.NaN,
                     Double.NaN,
+                    Double.NaN,
                     Double.NaN
             );
         } else {
             return new HoverInfo(
                     xMin + xPos, center.getY(), zMin + zPos, dataProvider.biome4Id(biome), height,
-<<<<<<< HEAD
-                    (double) temperature / 1 / Short.MAX_VALUE,
-                    (double) humidity / 1 / Short.MAX_VALUE,
-                    (double) continentalness / 0.5 / Short.MAX_VALUE,
-                    (double) erosion / 1 / Short.MAX_VALUE,
-=======
-                    (double) temperature / 1.0 / Short.MAX_VALUE,
-                    (double) humidity / 1.0 / Short.MAX_VALUE,
-                    (double) continentalness / 0.5 / Short.MAX_VALUE,
-                    (double) erosion / 1.0 / Short.MAX_VALUE,
->>>>>>> @{-1}
-                    (double) depth / 0.5 / Short.MAX_VALUE,
-                    (double) weirdness / 0.75 / Short.MAX_VALUE
+                    temperature / 1.0 / Short.MAX_VALUE,
+                    humidity / 1.0 / Short.MAX_VALUE,
+                    continentalness / 0.5 / Short.MAX_VALUE,
+                    erosion / 1.0 / Short.MAX_VALUE,
+                    depth / 0.5 / Short.MAX_VALUE,
+                    weirdness / 0.75 / Short.MAX_VALUE,
+                    NoiseRouterData.peaksAndValleys(Math.min(1.0f, Math.max(-1.0f, depth / 0.5f / Short.MAX_VALUE)))
             );
         }
     }
@@ -749,13 +754,14 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         String height = hoverInfo.height > Short.MIN_VALUE ? String.format("§b%d§r", hoverInfo.height) : "§7<N/A>§r";
         String noise = "";
         if (!Double.isNaN(hoverInfo.temperature)) {
-            noise = "\n\n§3T=§b%.2f§r §3H=§b%.2f§r §3C=§b%.2f§r\n§3E=§b%.2f§r §3D=§b%.2f§r §3W=§b%.2f§r".formatted(
+            noise = "\n\n§3T=§b%.2f§r §3H=§b%.2f§r §3C=§b%.2f§r\n§3E=§b%.2f§r §3D=§b%.2f§r §3W=§b%.2f§r\n§3PV=§b%.2f§r".formatted(
                     hoverInfo.temperature,
                     hoverInfo.humidity,
                     hoverInfo.continentalness,
                     hoverInfo.erosion,
                     hoverInfo.depth,
-                    hoverInfo.weirdness
+                    hoverInfo.weirdness,
+                    hoverInfo.pv
             );
         }
 
@@ -935,7 +941,8 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
             double continentalness,
             double erosion,
             double depth,
-            double weirdness
+            double weirdness,
+            double pv
     ) {}
 
     private record StructHoverHelperCell(List<StructHoverHelperEntry> entries) {
