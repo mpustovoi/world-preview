@@ -19,7 +19,6 @@ import caeruleusTait.world.preview.client.gui.widgets.lists.StructuresList;
 import caeruleusTait.world.preview.mixin.client.ScreenAccessor;
 import com.mojang.blaze3d.platform.NativeImage;
 import it.unimi.dsi.fastutil.shorts.Short2LongMap;
-import net.fabricmc.fabric.impl.client.screen.ButtonList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.*;
